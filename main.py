@@ -38,14 +38,17 @@ user_input = Text(width=100,
                   )
 user_input.grid(row=1, column=0)
 
+
 def new_para():
     curr_paragraph = paragraphs[random.randint(0, len(paragraphs) - 1)]
     t.config(state=NORMAL)
     t.delete("1.0", END)
     t.insert(INSERT, curr_paragraph)
     t.config(state=DISABLED)
+    user_input.delete("1.0", END)
     print("displaying new paragraph")
     print(curr_paragraph)
+
 
 next_btn = Button(
     text="New Paragraph",
