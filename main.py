@@ -1,13 +1,50 @@
 from tkinter import *
 import pandas as pd
 import random
-import time
+import math
+
+curr_paragraph = None
+timer = None
+
+
+def new_para():
+    global timer
+    global curr_paragraph
+    curr_paragraph = paragraphs[random.randint(0, len(paragraphs) - 1)]
+    display_text.config(state=NORMAL)
+    display_text.delete("1.0", END)
+    display_text.insert(INSERT, curr_paragraph)
+    display_text.config(state=DISABLED)
+    user_input.delete("1.0", END)
+    print("displaying new paragraph")
+    print(curr_paragraph)
+    if timer:
+        window.after_cancel(timer)
+    start_timer()
+
+
+def start_timer():
+    timer_text.config(text="00:00")
+    count_timer(00)
+
+
+def count_timer(time):
+    global timer
+    min = math.floor(time / 60)
+    if min < 10:
+        min = "0" + str(min)
+
+    sec = time % 60
+    if sec < 10:
+        sec = "0" + str(sec)
+
+    timer_text.config(text=f"{min}:{sec}")
+    timer = window.after(1000, count_timer, time + 1)
+
 
 window = Tk()
 window.title("Typing Speed Test")
 window.config(padx=50, pady=50)
-
-canvas = Canvas(window, width=1000, height=200)
 
 # replace with pandas eventually #
 paragraphs = []
@@ -15,39 +52,30 @@ with open("data/paragraphs.txt", "r") as data:
     for line in data:
         paragraphs.append(line)
 # ------------------------------ #
+
+timer_text = Label(text="00:00", fg="white", font=("Arial", 35, "bold"))
+timer_text.grid(column=0, row=0)
+
 curr_paragraph = paragraphs[random.randint(0, len(paragraphs)-1)]
 print(curr_paragraph)
 full_paragraph = []
-t = Text(window, fg='#808080', font=("Ariel", 25,), width=50, height=10)
-t.insert(INSERT, curr_paragraph)
-t.config(state=DISABLED)
-# for i in range(len(curr_paragraph)):
-#     #print(char)
-#     text = Label(canvas, text=curr_paragraph[i], fg='#808080', font=("Ariel", 25,), wraplength=800, justify="center")
-#     full_paragraph.append(text)
-#     text.pack(side='left')
-t.grid(row=0, column=0)
+display_text = Text(window,
+                    fg='#808080',
+                    font=("Ariel", 25,),
+                    width=50,
+                    height=10
+                    )
+display_text.insert(INSERT, curr_paragraph)
+display_text.config(state=DISABLED)
+display_text.grid(row=1, column=0)
 
-
-#print(full_paragraph[0])
 
 user_input = Text(width=100,
                   height=5,
                   padx=10,
                   pady=10
                   )
-user_input.grid(row=1, column=0)
-
-
-def new_para():
-    curr_paragraph = paragraphs[random.randint(0, len(paragraphs) - 1)]
-    t.config(state=NORMAL)
-    t.delete("1.0", END)
-    t.insert(INSERT, curr_paragraph)
-    t.config(state=DISABLED)
-    user_input.delete("1.0", END)
-    print("displaying new paragraph")
-    print(curr_paragraph)
+user_input.grid(row=2, column=0)
 
 
 next_btn = Button(
@@ -56,7 +84,5 @@ next_btn = Button(
                   )
 next_btn.grid(row=3, column=0)
 
-#print(text['text'][0])
-#t[0].config(fg='blue')
 
 window.mainloop()
