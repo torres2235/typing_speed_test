@@ -3,6 +3,7 @@ from tkinter import font
 import pandas as pd
 import random
 import math
+from pynput import keyboard
 
 curr_paragraph = None
 timer = None
@@ -40,15 +41,15 @@ def count_timer(time):
 
     timer_text.config(text=f"{min}:{sec}")
     timer = window.after(1000, count_timer, time + 1)
-    change_color()
+    #change_color()
 
 
-def change_color():
+def change_color(key):
     display_font = font.Font(display_text, display_text.cget("font"))
-    input_font = font.Font(user_input, user_input.cget("font"))
+    #input_font = font.Font(user_input, user_input.cget("font"))
     display_text.tag_config("red", font=display_font, foreground="Red")
     display_text.tag_config("green", font=display_font, foreground="Green")
-    user_input.tag_config("green", font=input_font, foreground="Green")
+    #user_input.tag_config("green", font=input_font, foreground="Green")
 
     dis = display_text.get(1.0, "end")
     usr = user_input.get(1.0, "end")
@@ -109,5 +110,8 @@ next_btn = Button(
                   )
 next_btn.grid(row=3, column=0)
 
+listener = keyboard.Listener(
+    on_press=change_color)
+listener.start()
 
 window.mainloop()
