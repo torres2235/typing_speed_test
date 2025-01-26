@@ -3,10 +3,10 @@ from tkinter import font
 import pandas as pd
 import random
 import math
-from pynput import keyboard
 
 curr_paragraph = None
 timer = None
+wpm = None
 mistakes = 0
 mistake_index = []
 
@@ -16,6 +16,7 @@ def new_para():
     global timer
     global curr_paragraph
     global mistakes
+    global wpm
     mistakes = 0
     mistake_count.config(text="Mistakes: 0")
     curr_paragraph = paragraphs[random.randint(0, len(paragraphs) - 1)]
@@ -28,6 +29,7 @@ def new_para():
     print(curr_paragraph)
     if timer:
         window.after_cancel(timer)
+        window.after_cancel(wpm)
     start()
 
 
@@ -82,13 +84,15 @@ def change_color():
 
 
 def calc_wpm(time):
-    # wpm = (chars / 5) / mins
+    global wpm
     if time > 0:
         usr = user_input.get(1.0, "end")
-        wpm = round((len(usr) / 5) / (time/60), 2)
-        wpm_count.config(text=f"WPM:{wpm}")
+        word_count = (len(usr)-1)
+        gross_wpm = (word_count / 5) / (time/60)
+        net_wpm = gross_wpm - (mistakes / (time/60))
+        wpm_count.config(text=f"WPM:{net_wpm:.2f}")
 
-    window.after(1000, calc_wpm, time + 1)
+    wpm = window.after(1000, calc_wpm, time + 1)
 
 # ----------------  Window  ----------------#
 window = Tk()
@@ -102,7 +106,7 @@ with open("data/paragraphs.txt", "r") as data:
         paragraphs.append(line)
 # ------------------------------ #
 
-wpm_count = Label(text="WPM:0.0", fg="white", font=("Arial", 35, "bold"))
+wpm_count = Label(text="WPM:0.00", fg="white", font=("Arial", 35, "bold"))
 wpm_count.grid(row=0, column=0)
 timer_text = Label(text="00:00", fg="white", font=("Arial", 35, "bold"))
 timer_text.grid(column=1, row=0)
