@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter import font
 import pandas as pd
 import random
 import math
@@ -6,7 +7,7 @@ import math
 curr_paragraph = None
 timer = None
 
-
+#----------------  Functions  ----------------#
 def new_para():
     global timer
     global curr_paragraph
@@ -31,17 +32,39 @@ def start_timer():
 def count_timer(time):
     global timer
     min = math.floor(time / 60)
+    sec = time % 60
     if min < 10:
         min = "0" + str(min)
-
-    sec = time % 60
     if sec < 10:
         sec = "0" + str(sec)
 
     timer_text.config(text=f"{min}:{sec}")
     timer = window.after(1000, count_timer, time + 1)
+    change_color()
 
 
+def change_color():
+    display_font = font.Font(display_text, display_text.cget("font"))
+    input_font = font.Font(user_input, user_input.cget("font"))
+    display_text.tag_config("red", font=display_font, foreground="Red")
+    display_text.tag_config("green", font=display_font, foreground="Green")
+    user_input.tag_config("green", font=input_font, foreground="Green")
+
+    dis = display_text.get(1.0, "end")
+    usr = user_input.get(1.0, "end")
+
+    for i in range(len(usr)):
+        if usr[i] != dis[i]:
+            display_text.tag_add("red", f"1.{i}")
+        else:
+            display_text.tag_add("green", f"1.{i}")
+
+    for tag in display_text.tag_names():
+        display_text.tag_remove(tag, f"1.{len(usr)}", "end")
+
+
+
+#----------------  Window  ----------------#
 window = Tk()
 window.title("Typing Speed Test")
 window.config(padx=50, pady=50)
@@ -63,7 +86,8 @@ display_text = Text(window,
                     fg='#808080',
                     font=("Ariel", 25,),
                     width=50,
-                    height=10
+                    height=10,
+                    wrap=WORD,  # wrap at word boundry
                     )
 display_text.insert(INSERT, curr_paragraph)
 display_text.config(state=DISABLED)
@@ -73,7 +97,8 @@ display_text.grid(row=1, column=0)
 user_input = Text(width=100,
                   height=5,
                   padx=10,
-                  pady=10
+                  pady=10,
+                  wrap=WORD,
                   )
 user_input.grid(row=2, column=0)
 
