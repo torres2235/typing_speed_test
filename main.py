@@ -32,7 +32,7 @@ def start():
     global wpm
     global mistakes
     mistakes = 0
-    #timer_text.config(text="1:00")
+    start_btn.config(text="Reset")
     if timer:
         window.after_cancel(timer)
         window.after_cancel(wpm)
@@ -87,7 +87,13 @@ def change_color():
 
     display_text.tag_add("grey_bg", f"1.{len(usr)-1}")
 
-    window.after(1, change_color)  # refresh
+    self = window.after(1, change_color)  # refresh
+
+    if len(usr) == len(dis)-1:
+        window.after_cancel(timer)
+        window.after_cancel(wpm)
+        window.after_cancel(self)
+        user_input.config(state=DISABLED)
 
 
 def calc_wpm(time):
@@ -97,7 +103,7 @@ def calc_wpm(time):
         word_count = (len(usr)-1)
         gross_wpm = (word_count / 5) / (time/60)
         net_wpm = gross_wpm - (mistakes / (time/60)) if gross_wpm - (mistakes / (time/60)) > 0 else 0
-        wpm_count.config(text=f"WPM:{net_wpm:.2f}")
+        wpm_count.config(text=f"WPM: {net_wpm:.2f}")
 
     wpm = window.after(1000, calc_wpm, time + 1)
 
@@ -105,7 +111,7 @@ def calc_wpm(time):
 # ----------------  Window  ----------------#
 window = Tk()
 window.title("Typing Speed Test")
-window.config(padx=50, pady=50)
+window.config(padx=25, pady=15)
 
 # replace with pandas eventually #
 paragraphs = []
@@ -114,11 +120,11 @@ with open("data/paragraphs.txt", "r") as data:
         paragraphs.append(line)
 # ------------------------------ #
 
-wpm_count = Label(text="WPM:00.00", fg="white", font=("Arial", 35, "bold"))
+wpm_count = Label(text="WPM: 00.00", fg="white", font=("Arial", 30, "bold"))
 wpm_count.grid(row=0, column=0)
 timer_text = Label(text="00:00", fg="white", font=("Arial", 35, "bold"))
-timer_text.grid(column=1, row=0)
-mistake_count = Label(text="Mistakes:0", fg="white", font=("Arial", 35, "bold"))
+timer_text.grid(row=0,column=1)
+mistake_count = Label(text="Mistakes: 0", fg="white", font=("Arial", 30, "bold"))
 mistake_count.grid(row=0, column=2)
 
 display_text = Text(window,
@@ -128,18 +134,20 @@ display_text = Text(window,
                     height=10,
                     wrap=WORD,  # wrap at word boundary
                     )
+display_text.insert(INSERT, "Click 'start' to begin . . .")
 display_text.config(state=DISABLED)
-display_text.grid(row=1, column=1)
+display_text.grid(row=1, column=0, columnspan=3)
 
-user_input = Text(width=90,
+user_input = Text(width=89,
                   height=5,
                   padx=10,
                   pady=10,
                   wrap=WORD,
                   )
-user_input.grid(row=2, column=1)
+user_input.insert(INSERT, "Type here . . .")
+user_input.grid(row=2, column=0, columnspan=3)
 
-next_btn = Button(text="New Paragraph", command=start)
-next_btn.grid(row=3, column=1)
+start_btn = Button(text="Start", font=("Ariel", 14, "bold"), height=2, command=start)
+start_btn.grid(row=3, column=1)
 
 window.mainloop()
