@@ -13,29 +13,31 @@ mistake_index = []
 
 # ----------------  Functions  ----------------#
 def new_para():
-    global timer
     global curr_paragraph
-    global mistakes
-    global wpm
-    mistakes = 0
     mistake_count.config(text="Mistakes: 0")
     curr_paragraph = paragraphs[random.randint(0, len(paragraphs) - 1)]
     display_text.config(state=NORMAL)
     display_text.delete("1.0", END)
     display_text.insert(INSERT, curr_paragraph)
     display_text.config(state=DISABLED)
+    user_input.config(state=NORMAL)
     user_input.delete("1.0", END)
     print("displaying new paragraph")
     print(curr_paragraph)
-    if timer:
-        window.after_cancel(timer)
-        window.after_cancel(wpm)
-    start()
+
 
 
 def start():
-    timer_text.config(text="00:00")
-    count_timer(00)
+    global timer
+    global wpm
+    global mistakes
+    mistakes = 0
+    #timer_text.config(text="1:00")
+    if timer:
+        window.after_cancel(timer)
+        window.after_cancel(wpm)
+    new_para()
+    count_timer(60)
     change_color()
     calc_wpm(00)
 
@@ -50,7 +52,12 @@ def count_timer(time):
         sec = "0" + str(sec)
 
     timer_text.config(text=f"{min}:{sec}")
-    timer = window.after(1000, count_timer, time + 1)
+    timer = window.after(1000, count_timer, time - 1)
+
+    if time < 1:
+        window.after_cancel(timer)
+        window.after_cancel(wpm)
+        user_input.config(state=DISABLED)
 
 
 def change_color():
@@ -89,10 +96,11 @@ def calc_wpm(time):
         usr = user_input.get(1.0, "end")
         word_count = (len(usr)-1)
         gross_wpm = (word_count / 5) / (time/60)
-        net_wpm = gross_wpm - (mistakes / (time/60))
+        net_wpm = gross_wpm - (mistakes / (time/60)) if gross_wpm - (mistakes / (time/60)) > 0 else 0
         wpm_count.config(text=f"WPM:{net_wpm:.2f}")
 
     wpm = window.after(1000, calc_wpm, time + 1)
+
 
 # ----------------  Window  ----------------#
 window = Tk()
@@ -106,28 +114,24 @@ with open("data/paragraphs.txt", "r") as data:
         paragraphs.append(line)
 # ------------------------------ #
 
-wpm_count = Label(text="WPM:0.00", fg="white", font=("Arial", 35, "bold"))
+wpm_count = Label(text="WPM:00.00", fg="white", font=("Arial", 35, "bold"))
 wpm_count.grid(row=0, column=0)
 timer_text = Label(text="00:00", fg="white", font=("Arial", 35, "bold"))
 timer_text.grid(column=1, row=0)
 mistake_count = Label(text="Mistakes:0", fg="white", font=("Arial", 35, "bold"))
 mistake_count.grid(row=0, column=2)
 
-curr_paragraph = paragraphs[random.randint(0, len(paragraphs) - 1)]
-print(curr_paragraph)
-full_paragraph = []
 display_text = Text(window,
                     fg='#808080',
                     font=("Ariel", 25,),
-                    width=50,
+                    width=40,
                     height=10,
                     wrap=WORD,  # wrap at word boundary
                     )
-display_text.insert(INSERT, curr_paragraph)
 display_text.config(state=DISABLED)
 display_text.grid(row=1, column=1)
 
-user_input = Text(width=100,
+user_input = Text(width=90,
                   height=5,
                   padx=10,
                   pady=10,
@@ -135,7 +139,7 @@ user_input = Text(width=100,
                   )
 user_input.grid(row=2, column=1)
 
-next_btn = Button(text="New Paragraph", command=new_para)
+next_btn = Button(text="New Paragraph", command=start)
 next_btn.grid(row=3, column=1)
 
 window.mainloop()
