@@ -7,7 +7,8 @@ import math
 curr_paragraph = None
 timer = None
 wpm = None
-mistakes = 0
+overall_mistakes = 0
+curr_mistakes = 0
 mistake_index = []
 
 
@@ -61,7 +62,8 @@ def count_timer(time):
 
 
 def change_color():
-    global mistakes
+    global overall_mistakes
+    global curr_mistakes
     global mistake_index
     display_font = font.Font(display_text, display_text.cget("font"))
     display_text.tag_config("red", font=display_font, foreground="Red")
@@ -76,10 +78,13 @@ def change_color():
         if usr[i] != dis[i]:
             if mistake_index.count(i) < 1:
                 mistake_index.append(i)
-                mistakes += 1
-                mistake_count.config(text=f"Mistakes: {mistakes}")
+                overall_mistakes += 1
+                curr_mistakes += 1
+                mistake_count.config(text=f"Mistakes: {overall_mistakes}")
             display_text.tag_add("red", f"1.{i}")
         else:
+            if mistake_index.count(i) < 1:
+                curr_mistakes -= 1
             display_text.tag_add("green", f"1.{i}")
 
     for tag in display_text.tag_names():
@@ -98,11 +103,12 @@ def change_color():
 
 def calc_wpm(time):
     global wpm
+    global curr_mistakes
     if time > 0:
         usr = user_input.get(1.0, "end")
         word_count = (len(usr)-1)
         gross_wpm = (word_count / 5) / (time/60)
-        net_wpm = gross_wpm - (mistakes / (time/60)) if gross_wpm - (mistakes / (time/60)) > 0 else 0
+        net_wpm = ((gross_wpm - curr_mistakes) / (time/60)) if ((gross_wpm - curr_mistakes) / (time/60)) > 0 else 0
         wpm_count.config(text=f"WPM: {net_wpm:.2f}")
 
     wpm = window.after(1000, calc_wpm, time + 1)
