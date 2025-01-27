@@ -9,3 +9,7 @@ Typing speed is measured by the number of words you can type correctly in a set 
 
 ![Gross WPM calculation](/images/Gross_WPM.png)
 ![Net WPM calculation](/images/Net_WPM.png)
+
+## Recommended Typing Position
+
+![Typing position diagram](/images/typing_pos.jpg)
