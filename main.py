@@ -41,6 +41,7 @@ def start():
     count_timer(60)
     change_color()
     calc_wpm(00)
+    calc_accuracy()
 
 
 def count_timer(time):
@@ -79,12 +80,12 @@ def change_color():
             if mistake_index.count(i) < 1:
                 mistake_index.append(i)
                 overall_mistakes += 1
-                curr_mistakes += 1
+                #curr_mistakes += 1
                 mistake_count.config(text=f"Mistakes: {overall_mistakes}")
             display_text.tag_add("red", f"1.{i}")
         else:
-            if mistake_index.count(i) < 1:
-                curr_mistakes -= 1
+            #if mistake_index.count(i) > 0:
+                #curr_mistakes -= 1
             display_text.tag_add("green", f"1.{i}")
 
     for tag in display_text.tag_names():
@@ -103,15 +104,24 @@ def change_color():
 
 def calc_wpm(time):
     global wpm
-    global curr_mistakes
+    global overall_mistakes
     if time > 0:
         usr = user_input.get(1.0, "end")
         word_count = (len(usr)-1)
-        gross_wpm = (word_count / 5) / (time/60)
-        net_wpm = ((gross_wpm - curr_mistakes) / (time/60)) if ((gross_wpm - curr_mistakes) / (time/60)) > 0 else 0
+        gross_wpm = (word_count / 5) #/ (time/60)
+        net_wpm = ((gross_wpm - overall_mistakes) / (time/60)) if ((gross_wpm - overall_mistakes) / (time/60)) > 0 else 0
         wpm_count.config(text=f"WPM: {net_wpm:.2f}")
 
     wpm = window.after(1000, calc_wpm, time + 1)
+
+
+def calc_accuracy():
+    global overall_mistakes
+    usr = user_input.get(1.0, "end")
+    percentage = ((len(usr) - overall_mistakes) / len(usr)) * 100
+    accuracy.config(text=f"Accuracy: {percentage:.2f}%")
+
+    acc = window.after(1000, calc_accuracy)
 
 
 # ----------------  Window  ----------------#
@@ -127,33 +137,37 @@ with open("data/paragraphs.txt", "r") as data:
 # ------------------------------ #
 
 wpm_count = Label(text="WPM: 00.00", fg="white", font=("Arial", 30, "bold"))
-wpm_count.grid(row=0, column=0)
+wpm_count.grid(row=1, column=3)
 timer_text = Label(text="00:00", fg="white", font=("Arial", 35, "bold"))
 timer_text.grid(row=0,column=1)
 mistake_count = Label(text="Mistakes: 0", fg="white", font=("Arial", 30, "bold"))
-mistake_count.grid(row=0, column=2)
+mistake_count.grid(row=2, column=3)
+accuracy = Label(text="Accuracy: 00.00%", fg="white", font=("Arial", 30, "bold"))
+accuracy.grid(row=3, column=3)
 
 display_text = Text(window,
                     fg='#808080',
                     font=("Ariel", 25,),
                     width=40,
                     height=10,
+                    padx=10,
+                    pady=5,
                     wrap=WORD,  # wrap at word boundary
                     )
 display_text.insert(INSERT, "Click 'start' to begin . . .")
 display_text.config(state=DISABLED)
-display_text.grid(row=1, column=0, columnspan=3)
+display_text.grid(row=1, column=0, rowspan=3, columnspan=3)
 
-user_input = Text(width=89,
+user_input = Text(width=91,
                   height=5,
                   padx=10,
                   pady=10,
                   wrap=WORD,
                   )
 user_input.insert(INSERT, "Type here . . .")
-user_input.grid(row=2, column=0, columnspan=3)
+user_input.grid(row=4, column=0, columnspan=3)
 
 start_btn = Button(text="Start", font=("Ariel", 14, "bold"), height=2, command=start)
-start_btn.grid(row=3, column=1)
+start_btn.grid(row=5, column=1)
 
 window.mainloop()
